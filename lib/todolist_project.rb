@@ -1,3 +1,6 @@
+require 'bundler/setup'
+require 'stamp'
+
 # frozen_string_literal: true
 
 # This class represents a todo item and its associated
@@ -8,7 +11,7 @@ class Todo
   DONE_MARKER = 'X'
   UNDONE_MARKER = ' '
 
-  attr_accessor :title, :description
+  attr_accessor :title, :description, :due_date
 
   def initialize(title, description = '')
     @title = title
@@ -33,7 +36,9 @@ class Todo
   end
 
   def to_s
-    "[#{done? ? DONE_MARKER : UNDONE_MARKER}] #{title}"
+    done_marker = done? ? DONE_MARKER : UNDONE_MARKER
+    due_date_str = due_date.stamp(' (Due: Friday January 6)') if due_date
+    "[#{done_marker}] #{title}#{due_date_str}"
   end
 
   private

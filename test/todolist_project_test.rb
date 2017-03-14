@@ -1,9 +1,13 @@
+require 'bundler/setup'
+
 require 'simplecov'
 SimpleCov.start
 
 require 'minitest/autorun'
 require 'minitest/reporters'
 Minitest::Reporters.use!
+
+require 'date'
 
 require_relative '../lib/todolist_project'
 
@@ -153,22 +157,22 @@ class TodoListTest < MiniTest::Test
     assert_includes(@list.to_s, @todo2.to_s)
     assert_includes(@list.to_s, @todo3.to_s)
 
-    output = <<~OUTPUT.chomp
-    ---- Today's Todos ----
-    [ ] Buy milk
-    [ ] Clean room
-    [ ] Go to gym
+    output = <<-OUTPUT.chomp.gsub(/^\s+/, '')
+      ---- Today's Todos ----
+      [ ] Buy milk
+      [ ] Clean room
+      [ ] Go to gym
     OUTPUT
 
     assert_equal(output, @list.to_s)
   end
 
   def test_to_s_2
-    output = <<~OUTPUT.chomp
-    ---- Today's Todos ----
-    [ ] Buy milk
-    [X] Clean room
-    [ ] Go to gym
+    output = <<-OUTPUT.chomp.gsub(/^\s+/, '')
+      ---- Today's Todos ----
+      [ ] Buy milk
+      [X] Clean room
+      [ ] Go to gym
     OUTPUT
 
     @list.mark_done_at(1)
@@ -176,11 +180,11 @@ class TodoListTest < MiniTest::Test
   end
 
   def test_to_s_3
-    output = <<~OUTPUT.chomp
-    ---- Today's Todos ----
-    [X] Buy milk
-    [X] Clean room
-    [X] Go to gym
+    output = <<-OUTPUT.chomp.gsub(/^\s+/, '')
+      ---- Today's Todos ----
+      [X] Buy milk
+      [X] Clean room
+      [X] Go to gym
     OUTPUT
 
     @list.done!
@@ -351,5 +355,26 @@ class TodoListTest < MiniTest::Test
     list = TodoList.new(@list.title)
     list << todo << @todo1 << @todo2 << @todo3
     assert_equal(list, @list.unshift(todo))
+  end
+
+  def test_no_due_date
+    assert_nil(@todo1.due_date)
+  end
+
+  def test_due_date
+    due_date = Date.today + 3
+    @todo2.due_date = due_date
+    assert(@todo2.due_date, due_date)
+  end
+
+  def test_to_s_with_due_date
+    @todo1.due_date = Date.new(2017, 4, 15)
+    output = <<-OUTPUT.chomp.gsub(/^\s+/, '')
+      ---- Today's Todos ----
+      [ ] Buy milk (Due: Saturday April 15)
+      [ ] Clean room
+      [ ] Go to gym
+    OUTPUT
+    assert_equal(output, @list.to_s)
   end
 end
